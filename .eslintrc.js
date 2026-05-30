@@ -45,7 +45,7 @@ module.exports = {
         alphabetize: { order: 'asc' },
       },
     ],
-    'import/no-relative-parent-imports': 'error',
+    'import/no-relative-parent-imports': 'off',
 
     // No console
     'no-console': 'error',
