@@ -1,45 +1,36 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import './src/i18n';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import * as Sentry from '@sentry/react-native';
+import React, { useEffect } from 'react';
+import Config from 'react-native-config';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+import { RootNavigator } from '@/navigation';
+import { useAppStore } from '@/store/app.store';
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+Sentry.init({
+  dsn: Config.SENTRY_DSN ?? '',
+  enabled: !__DEV__,
+  tracesSampleRate: 0.2,
 });
 
-export default App;
+const gestureHandlerStyle = { flex: 1 };
+
+function App(): React.JSX.Element {
+  const hydrate = useAppStore((s) => s.hydrate);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  return (
+    <GestureHandlerRootView style={gestureHandlerStyle}>
+      <SafeAreaProvider>
+        <RootNavigator />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+export default Sentry.wrap(App);
