@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 import { api } from './api';
 
 const mockFetch = jest.fn();
@@ -97,5 +99,30 @@ describe('api', () => {
       expect.any(String),
       expect.objectContaining({ method: 'DELETE' }),
     );
+  });
+
+  it('validates response against schema when provided', async () => {
+    const schema = z.object({ id: z.number(), name: z.string() });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ id: 1, name: 'Test' }),
+    });
+
+    const result = await api.get('/test', identity, { schema });
+    expect(result.success).toBe(true);
+  });
+
+  it('returns validation error when response does not match schema', async () => {
+    const schema = z.object({ id: z.number(), name: z.string() });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ wrong: 'shape' }),
+    });
+
+    const result = await api.get('/test', identity, { schema });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.code).toBe('VALIDATION_ERROR');
+    }
   });
 });

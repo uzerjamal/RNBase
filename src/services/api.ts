@@ -1,6 +1,8 @@
 import Config from 'react-native-config';
+import { type ZodSchema } from 'zod';
 
 import { logger } from '@/utils/logger';
+import { parseData } from '@/utils/validation';
 
 export interface ApiError {
   message: string;
@@ -13,6 +15,7 @@ export type ApiResult<T> = { success: true; data: T } | { success: false; error:
 interface RequestOptions {
   headers?: Record<string, string>;
   timeout?: number;
+  schema?: ZodSchema<unknown>;
 }
 
 const BASE_URL = Config.API_BASE_URL ?? '';
@@ -58,8 +61,22 @@ async function request<T>(
       return { success: false, error };
     }
 
-    const rawData = (await response.json()) as unknown;
-    const data = validate(rawData);
+    const raw: unknown = await response.json();
+
+    if (options.schema) {
+      const parsed = parseData(options.schema, raw, `${method} ${path}`);
+      if (!parsed.success) {
+        const error: ApiError = {
+          message: parsed.error.message,
+          status: response.status,
+          code: 'VALIDATION_ERROR',
+        };
+        return { success: false, error };
+      }
+      return { success: true, data: parsed.data as T };
+    }
+
+    const data = validate(raw);
     return { success: true, data };
   } catch (err) {
     clearTimeout(timeoutId);
