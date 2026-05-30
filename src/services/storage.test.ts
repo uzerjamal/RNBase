@@ -1,24 +1,20 @@
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 
 import { appStorage, secureStorage } from './storage';
 
-const mockCreateMMKV = createMMKV as jest.MockedFunction<typeof createMMKV>;
+const MockMMKV = MMKV as jest.MockedClass<typeof MMKV>;
 
-// storage.ts calls createMMKV twice at module init: results[0] = appStorage, results[1] = secureStorage.
-// The global mock returns the same mock object for both calls, which is fine for these wrapper tests.
-const mockAppStore = mockCreateMMKV.mock.results[0]?.value as {
+type MockInstance = {
   set: jest.Mock;
   getString: jest.Mock;
-  remove: jest.Mock;
+  delete: jest.Mock;
   clearAll: jest.Mock;
 };
 
-const mockSecureStore = mockCreateMMKV.mock.results[1]?.value as {
-  set: jest.Mock;
-  getString: jest.Mock;
-  remove: jest.Mock;
-  clearAll: jest.Mock;
-};
+// storage.ts calls new MMKV() twice at module init.
+// mock.results[n].value is the object returned by the mockImplementation factory.
+const mockAppStore = MockMMKV.mock.results[0]?.value as MockInstance;
+const mockSecureStore = MockMMKV.mock.results[1]?.value as MockInstance;
 
 describe('appStorage', () => {
   beforeEach(() => {
@@ -62,9 +58,9 @@ describe('appStorage', () => {
   });
 
   describe('delete', () => {
-    it('calls remove on storage', () => {
+    it('calls delete on storage', () => {
       appStorage.delete('key');
-      expect(mockAppStore.remove).toHaveBeenCalledWith('key');
+      expect(mockAppStore.delete).toHaveBeenCalledWith('key');
     });
   });
 
@@ -117,9 +113,9 @@ describe('secureStorage', () => {
   });
 
   describe('delete', () => {
-    it('calls remove on secureStore', () => {
+    it('calls delete on secureStore', () => {
       secureStorage.delete('token');
-      expect(mockSecureStore.remove).toHaveBeenCalledWith('token');
+      expect(mockSecureStore.delete).toHaveBeenCalledWith('token');
     });
   });
 

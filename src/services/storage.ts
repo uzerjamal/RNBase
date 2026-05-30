@@ -1,11 +1,11 @@
 import Config from 'react-native-config';
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 
 import { logger } from '@/utils/logger';
 
 // ─── Unencrypted storage ─────────────────────────────────────────────────────
 // Use for: UI preferences, theme, non-sensitive app state.
-const storage = createMMKV({ id: 'app-storage' });
+const storage = new MMKV({ id: 'app-storage' });
 
 // ─── Encrypted storage ───────────────────────────────────────────────────────
 // Use for: auth tokens, user PII, anything sensitive.
@@ -18,7 +18,7 @@ const storage = createMMKV({ id: 'app-storage' });
 //
 // Example with react-native-keychain:
 //   const { password } = await Keychain.getGenericPassword({ service: 'mmkv-key' });
-//   createMMKV({ id: 'secure-storage', encryptionKey: password });
+//   new MMKV({ id: 'secure-storage', encryptionKey: password });
 //
 // Never hardcode the key in source code or commit it in .env to version control.
 const encryptionKey = Config.MMKV_ENCRYPTION_KEY;
@@ -29,7 +29,7 @@ if (!encryptionKey || encryptionKey === 'change-this-before-production') {
   );
 }
 
-const secureStore = createMMKV({
+const secureStore = new MMKV({
   id: 'secure-storage',
   encryptionKey: encryptionKey ?? 'fallback-dev-key-do-not-use-in-prod',
 });
@@ -56,7 +56,7 @@ export const appStorage = {
 
   delete(key: string): void {
     try {
-      storage.remove(key);
+      storage.delete(key);
     } catch (error) {
       logger.error(`storage.delete failed for key: ${key}`, error);
     }
@@ -93,7 +93,7 @@ export const secureStorage = {
 
   delete(key: string): void {
     try {
-      secureStore.remove(key);
+      secureStore.delete(key);
     } catch (error) {
       logger.error(`secureStorage.delete failed for key: ${key}`, error);
     }
