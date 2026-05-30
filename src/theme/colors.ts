@@ -34,6 +34,7 @@ export interface AppColors {
   surface: string;
   surfaceElevated: string;
   border: string;
+  transparent: string;
   text: {
     primary: string;
     secondary: string;
@@ -52,6 +53,7 @@ export const lightColors: AppColors = {
   surface: palette.neutral50,
   surfaceElevated: palette.white,
   border: palette.neutral200,
+  transparent: palette.transparent,
   text: {
     primary: palette.neutral900,
     secondary: palette.neutral500,
@@ -70,6 +72,7 @@ export const darkColors: AppColors = {
   surface: palette.neutral800,
   surfaceElevated: palette.neutral700,
   border: palette.neutral700,
+  transparent: palette.transparent,
   text: {
     primary: palette.white,
     secondary: palette.neutral400,
