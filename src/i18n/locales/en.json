@@ -1,0 +1,9 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "loading": "Loading..."
+  }
+}
