@@ -17,12 +17,12 @@ export function HomeScreen(): React.JSX.Element {
   return (
     <Screen>
       <View style={styles.container}>
-        <Text variant="h2">RNBase Starter</Text>
+        <Text variant="h2">{t('home.title')}</Text>
         <Text variant="body" color="secondary" style={styles.subtitle}>
-          {t('common.error')}
+          {t('home.subtitle')}
         </Text>
         <Button
-          label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'}`}
+          label={t(theme === 'dark' ? 'home.switchToLight' : 'home.switchToDark')}
           onPress={handleToggleTheme}
           style={styles.button}
         />

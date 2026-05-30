@@ -5,5 +5,11 @@
     "error": "Something went wrong",
     "retry": "Retry",
     "loading": "Loading..."
+  },
+  "home": {
+    "title": "RNBase Starter",
+    "subtitle": "Production-ready React Native template",
+    "switchToLight": "Switch to Light",
+    "switchToDark": "Switch to Dark"
   }
 }

@@ -17,21 +17,30 @@ describe('appStorage', () => {
   });
 
   describe('get', () => {
-    it('returns parsed value when key exists', () => {
-      mockStorage.getString.mockReturnValueOnce(JSON.stringify({ id: 1 }));
-      const result = appStorage.get<{ id: number }>('key');
-      expect(result).toEqual({ id: 1 });
+    it('returns validated value when key exists', () => {
+      const parsed = { id: 1 };
+      mockStorage.getString.mockReturnValueOnce(JSON.stringify(parsed));
+      const result = appStorage.get<{ id: number }>('key', (d) => d as { id: number });
+      expect(result).toEqual(parsed);
     });
 
     it('returns null when key does not exist', () => {
       mockStorage.getString.mockReturnValueOnce(undefined);
-      const result = appStorage.get('key');
+      const result = appStorage.get('key', (d) => d);
+      expect(result).toBeNull();
+    });
+
+    it('returns null when validate throws', () => {
+      mockStorage.getString.mockReturnValueOnce(JSON.stringify('invalid'));
+      const result = appStorage.get('key', () => {
+        throw new Error('bad value');
+      });
       expect(result).toBeNull();
     });
 
     it('returns null on parse error', () => {
       mockStorage.getString.mockReturnValueOnce('invalid json {{{');
-      const result = appStorage.get('key');
+      const result = appStorage.get('key', (d) => d);
       expect(result).toBeNull();
     });
   });

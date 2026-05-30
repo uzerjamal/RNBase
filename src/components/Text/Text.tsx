@@ -1,5 +1,10 @@
-import React from 'react';
-import { Text as RNText, StyleSheet, type TextProps as RNTextProps } from 'react-native';
+import React, { useMemo } from 'react';
+import {
+  Text as RNText,
+  StyleSheet,
+  type TextStyle,
+  type TextProps as RNTextProps,
+} from 'react-native';
 
 import { useAppStore } from '@/store/app.store';
 import { fontSize, fontWeight, fontFamily } from '@/theme/typography';
@@ -44,8 +49,10 @@ export function Text({
   const colors = useAppStore((s) => s.colors);
   const textColor = color === 'error' ? colors.error : colors.text[color];
 
+  const dynamicTextStyle = useMemo<TextStyle>(() => ({ color: textColor }), [textColor]);
+
   return (
-    <RNText style={[styles.base, variantStyles[variant], { color: textColor }, style]} {...rest}>
+    <RNText style={[styles.base, variantStyles[variant], dynamicTextStyle, style]} {...rest}>
       {children}
     </RNText>
   );

@@ -5,11 +5,11 @@ import { logger } from '@/utils/logger';
 const storage = createMMKV({ id: 'app-storage' });
 
 export const appStorage = {
-  get<T>(key: string): T | null {
+  get<T>(key: string, validate: (data: unknown) => T): T | null {
     try {
       const value = storage.getString(key);
       if (value === undefined) return null;
-      return JSON.parse(value) as T;
+      return validate(JSON.parse(value));
     } catch (error) {
       logger.error(`storage.get failed for key: ${key}`, error);
       return null;

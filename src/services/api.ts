@@ -21,6 +21,7 @@ const DEFAULT_TIMEOUT = 10_000;
 async function request<T>(
   method: string,
   path: string,
+  validate: (data: unknown) => T,
   body?: unknown,
   options: RequestOptions = {},
 ): Promise<ApiResult<T>> {
@@ -42,10 +43,10 @@ async function request<T>(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorBody = (await response.json().catch(() => ({}))) as {
-        message?: string;
-        code?: string;
-      };
+      const errorBody = (await response.json().catch((err: unknown) => {
+        logger.error(`Failed to parse error response from ${method} ${path}`, err);
+        return {};
+      })) as { message?: string; code?: string };
       const error: ApiError = {
         message: errorBody.message ?? response.statusText,
         status: response.status,
@@ -57,7 +58,8 @@ async function request<T>(
       return { success: false, error };
     }
 
-    const data = (await response.json()) as T;
+    const rawData = (await response.json()) as unknown;
+    const data = validate(rawData);
     return { success: true, data };
   } catch (err) {
     clearTimeout(timeoutId);
@@ -78,18 +80,36 @@ async function request<T>(
 }
 
 export const api = {
-  get: <T>(path: string, options?: RequestOptions): Promise<ApiResult<T>> =>
-    request<T>('GET', path, undefined, options),
+  get: <T>(
+    path: string,
+    validate: (data: unknown) => T,
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> => request<T>('GET', path, validate, undefined, options),
 
-  post: <T>(path: string, body: unknown, options?: RequestOptions): Promise<ApiResult<T>> =>
-    request<T>('POST', path, body, options),
+  post: <T>(
+    path: string,
+    body: unknown,
+    validate: (data: unknown) => T,
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> => request<T>('POST', path, validate, body, options),
 
-  put: <T>(path: string, body: unknown, options?: RequestOptions): Promise<ApiResult<T>> =>
-    request<T>('PUT', path, body, options),
+  put: <T>(
+    path: string,
+    body: unknown,
+    validate: (data: unknown) => T,
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> => request<T>('PUT', path, validate, body, options),
 
-  patch: <T>(path: string, body: unknown, options?: RequestOptions): Promise<ApiResult<T>> =>
-    request<T>('PATCH', path, body, options),
+  patch: <T>(
+    path: string,
+    body: unknown,
+    validate: (data: unknown) => T,
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> => request<T>('PATCH', path, validate, body, options),
 
-  delete: <T>(path: string, options?: RequestOptions): Promise<ApiResult<T>> =>
-    request<T>('DELETE', path, undefined, options),
+  delete: <T>(
+    path: string,
+    validate: (data: unknown) => T,
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> => request<T>('DELETE', path, validate, undefined, options),
 };

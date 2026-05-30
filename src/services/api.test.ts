@@ -3,6 +3,8 @@ import { api } from './api';
 const mockFetch = jest.fn();
 (globalThis as { fetch: typeof fetch }).fetch = mockFetch as typeof fetch;
 
+const identity = (d: unknown): unknown => d;
+
 describe('api', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -15,7 +17,7 @@ describe('api', () => {
       json: () => Promise.resolve(data),
     });
 
-    const result = await api.get('/test');
+    const result = await api.get('/test', identity);
     expect(result).toEqual({ success: true, data });
   });
 
@@ -27,7 +29,7 @@ describe('api', () => {
       json: () => Promise.resolve({ message: 'Resource not found' }),
     });
 
-    const result = await api.get('/test');
+    const result = await api.get('/test', identity);
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.status).toBe(404);
@@ -37,8 +39,23 @@ describe('api', () => {
   it('returns error result on network failure', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const result = await api.get('/test');
+    const result = await api.get('/test', identity);
     expect(result.success).toBe(false);
+  });
+
+  it('logs when error response body cannot be parsed', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      statusText: 'Bad Gateway',
+      json: () => Promise.reject(new Error('not json')),
+    });
+
+    const result = await api.get('/test', identity);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.status).toBe(502);
+    }
   });
 
   it('sends body on POST', async () => {
@@ -48,7 +65,7 @@ describe('api', () => {
       json: () => Promise.resolve({ id: 1 }),
     });
 
-    await api.post('/test', body);
+    await api.post('/test', body, identity);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ method: 'POST', body: JSON.stringify(body) }),
@@ -57,7 +74,7 @@ describe('api', () => {
 
   it('calls PUT with body', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
-    await api.put('/test', { id: 1 });
+    await api.put('/test', { id: 1 }, identity);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ method: 'PUT' }),
@@ -66,7 +83,7 @@ describe('api', () => {
 
   it('calls PATCH with body', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
-    await api.patch('/test', { id: 1 });
+    await api.patch('/test', { id: 1 }, identity);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ method: 'PATCH' }),
@@ -75,7 +92,7 @@ describe('api', () => {
 
   it('calls DELETE without body', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
-    await api.delete('/test');
+    await api.delete('/test', identity);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ method: 'DELETE' }),

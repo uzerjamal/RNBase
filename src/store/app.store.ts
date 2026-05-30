@@ -19,6 +19,11 @@ interface AppStore {
 
 const THEME_KEY = 'app:theme';
 
+function validateTheme(data: unknown): Theme {
+  if (data === 'light' || data === 'dark' || data === 'system') return data;
+  throw new Error(`Invalid theme value: ${String(data)}`);
+}
+
 export const useAppStore = create<AppStore>()((set) => ({
   theme: 'system',
   colors: lightColors,
@@ -33,7 +38,7 @@ export const useAppStore = create<AppStore>()((set) => ({
   },
 
   hydrate: (): void => {
-    const savedTheme = appStorage.get<Theme>(THEME_KEY);
+    const savedTheme = appStorage.get<Theme>(THEME_KEY, validateTheme);
     if (savedTheme) {
       set({
         theme: savedTheme,
