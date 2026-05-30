@@ -1,4 +1,20 @@
+import { appStorage } from '@/services/storage';
+
 import { useAppStore } from './app.store';
+
+jest.mock('@/services/storage', () => ({
+  appStorage: {
+    get: jest.fn(),
+    set: jest.fn(),
+    delete: jest.fn(),
+    clear: jest.fn(),
+  },
+}));
+
+const mockAppStorage = appStorage as unknown as {
+  get: jest.Mock;
+  set: jest.Mock;
+};
 
 describe('useAppStore', () => {
   beforeEach(() => {
@@ -27,6 +43,13 @@ describe('useAppStore', () => {
 
   it('hydrate sets isHydrated to true', () => {
     useAppStore.getState().hydrate();
+    expect(useAppStore.getState().isHydrated).toBe(true);
+  });
+
+  it('hydrate restores saved dark theme', () => {
+    mockAppStorage.get.mockReturnValueOnce('dark');
+    useAppStore.getState().hydrate();
+    expect(useAppStore.getState().theme).toBe('dark');
     expect(useAppStore.getState().isHydrated).toBe(true);
   });
 });

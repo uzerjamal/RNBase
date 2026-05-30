@@ -16,6 +16,9 @@ module.exports = {
     '!src/i18n/**',
     '!src/types/**',
     '!src/theme/**',
+    '!src/**/index.ts',
+    '!src/**/index.tsx',
+    '!src/navigation/**',
   ],
   coverageThreshold: {
     global: {

@@ -28,4 +28,34 @@ describe('Button', () => {
     expect(screen.queryByText('Press me')).toBeNull();
     expect(screen.getByRole('button')).toHaveAccessibilityState({ busy: true });
   });
+
+  it('renders secondary variant', () => {
+    render(<Button label="Secondary" variant="secondary" />);
+    expect(screen.getByText('Secondary')).toBeTruthy();
+  });
+
+  it('renders ghost variant', () => {
+    render(<Button label="Ghost" variant="ghost" />);
+    expect(screen.getByText('Ghost')).toBeTruthy();
+  });
+
+  it('renders destructive variant', () => {
+    render(<Button label="Danger" variant="destructive" />);
+    expect(screen.getByText('Danger')).toBeTruthy();
+  });
+
+  it('renders full width', () => {
+    render(<Button label="Full" fullWidth />);
+    expect(screen.getByText('Full')).toBeTruthy();
+  });
+
+  it('renders small size', () => {
+    render(<Button label="Small" size="sm" />);
+    expect(screen.getByText('Small')).toBeTruthy();
+  });
+
+  it('renders large size', () => {
+    render(<Button label="Large" size="lg" />);
+    expect(screen.getByText('Large')).toBeTruthy();
+  });
 });

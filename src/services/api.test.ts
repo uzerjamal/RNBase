@@ -51,10 +51,34 @@ describe('api', () => {
     await api.post('/test', body);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify(body),
-      }),
+      expect.objectContaining({ method: 'POST', body: JSON.stringify(body) }),
+    );
+  });
+
+  it('calls PUT with body', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
+    await api.put('/test', { id: 1 });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: 'PUT' }),
+    );
+  });
+
+  it('calls PATCH with body', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
+    await api.patch('/test', { id: 1 });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: 'PATCH' }),
+    );
+  });
+
+  it('calls DELETE without body', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
+    await api.delete('/test');
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: 'DELETE' }),
     );
   });
 });
